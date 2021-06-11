@@ -3,12 +3,15 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from main_app.models import File, Folder
-from main_app.serializers import FileSerializer, FolderSerializer
+from main_app.models import File
+from main_app.models import Folder
+from main_app.serializers import FileSerializer
+from main_app.serializers import FolderSerializer
+
 
 class folder_list(APIView):
     def get(self, request):
-        folders = Folder.objects.filter(folder=None) 
+        folders = Folder.objects.filter(folder=None)
         serializer = FolderSerializer(folders, many=True)
         return Response(serializer.data)
 
@@ -19,16 +22,18 @@ class folder_list(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class folder_detail(APIView):
     def get(self, request, pk):
-        folder = Folder.objects.get(id=pk) 
+        folder = Folder.objects.get(id=pk)
         folder_serializer = FolderSerializer(folder)
 
         files = folder.folder_files.all()
         file_serializer = FileSerializer(files, many=True)
 
         context = [folder_serializer.data, file_serializer.data]
-        return Response(context)        
+        return Response(context)
+
 
 class file_detail(APIView):
     def get_object(self, pk):
