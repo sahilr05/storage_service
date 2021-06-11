@@ -61,6 +61,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main_app'
+    "rest_framework",
+    "rest_framework.authtoken",
+    "rest_framework_swagger",
+    "drf_yasg",
 ]
 
 REST_FRAMEWORK = {
@@ -146,3 +150,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = "/media/"                                 # add this 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')          # add this
