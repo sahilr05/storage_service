@@ -3,3 +3,6 @@
 *.pyc
 .env
 secret_key.py
+/media/documents/*
+/media/*.pdf
+/media/*.txt

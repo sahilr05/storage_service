@@ -16,7 +16,7 @@ from django.utils import timezone
 
 class File(models.Model):
     file_id = models.AutoField(primary_key=True)
-    file = models.FileField(null=True, max_length=255)
+    file = models.FileField(null=True, max_length=255, upload_to='documents/%Y/%m/%d/')
     date_created = models.DateTimeField(default = timezone.now)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='userfiles')
 
