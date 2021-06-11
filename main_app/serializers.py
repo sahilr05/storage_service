@@ -1,10 +1,15 @@
 from django.db.models import fields
 from rest_framework import serializers
 from .models import File, Folder
+import math
 from main_app import models
 
 class FolderSerializer(serializers.ModelSerializer):
     sub_folders = serializers.SerializerMethodField()
+    creator = serializers.SerializerMethodField()
+
+    def get_creator(self, obj):
+        return obj.user.username
 
     def get_sub_folders(self, obj):
         folders=''
@@ -13,7 +18,7 @@ class FolderSerializer(serializers.ModelSerializer):
         return folders
     class Meta:
         model = Folder
-        fields=('name', 'user', 'sub_folders')
+        fields=('name', 'creator', 'sub_folders')
 
 
 class FileSerializer(serializers.ModelSerializer):    
@@ -22,7 +27,8 @@ class FileSerializer(serializers.ModelSerializer):
         file_size = ''
         if obj.file and hasattr(obj.file, 'size'):
             file_size = obj.file.size
-        return file_size    
+            
+        return str(round(file_size/(1024*1024), 2))+' MB'
     
     def get_name(self, obj):
         file_name = ''

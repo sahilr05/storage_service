@@ -19,6 +19,17 @@ class folder_list(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class folder_detail(APIView):
+    def get(self, request, pk):
+        folder = Folder.objects.get(id=pk) 
+        folder_serializer = FolderSerializer(folder)
+
+        files = folder.folder_files.all()
+        file_serializer = FileSerializer(files, many=True)
+
+        context = [folder_serializer.data, file_serializer.data]
+        return Response(context)        
+
 class file_detail(APIView):
     def get_object(self, pk):
         try:
