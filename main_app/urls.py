@@ -1,9 +1,12 @@
 ... 
 from django.conf import settings
 from django.conf.urls.static import static
+from django.urls import path
+from main_app import views
 
 urlpatterns = [
-    
+    path('folder_list/', views.folder_list.as_view()),
+    path('file_detail/<int:pk>/', views.file_detail.as_view())
 ]
 
 if settings.DEBUG:     
