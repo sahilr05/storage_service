@@ -110,7 +110,7 @@ DATABASES = {
         "ENGINE": get_env_variable_or_default(
             "SQL_ENGINE", "django.db.backends.postgresql"
         ),
-        "NAME": get_env_variable_or_default("SQL_DATABASE", "server_storage"),
+        "NAME": get_env_variable_or_default("SQL_DATABASE", "storage_service"),
         "USER": get_env_variable_or_default("SQL_USER", "postgres"),
         "PASSWORD": get_env_variable_or_default("SQL_PASSWORD", "password"),
         "HOST": get_env_variable_or_default("SQL_HOST", "localhost"),
