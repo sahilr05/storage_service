@@ -18,7 +18,11 @@ class Folder(models.Model):
 class File(models.Model):
     file_id = models.AutoField(primary_key=True)
     folder = models.ForeignKey(
-        Folder, on_delete=models.CASCADE, related_name="folder_files", null=True
+        Folder,
+        on_delete=models.CASCADE,
+        related_name="folder_files",
+        null=True,
+        blank=True,
     )
     file = models.FileField(null=True, max_length=255, upload_to="documents/")
     date_created = models.DateTimeField(default=timezone.now)

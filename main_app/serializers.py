@@ -44,23 +44,19 @@ class FileSerializer(serializers.ModelSerializer):
         date_added = obj.date_created
         return date_added
 
-    def get_parent_folder(self, obj):
-        parent_folder = obj.folder.name
-        return parent_folder
-
     size = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
     file_type = serializers.SerializerMethodField()
     since_added = serializers.SerializerMethodField()
-    parent_folder = serializers.SerializerMethodField()
 
     class Meta:
         model = File
         fields = (
-            "file_id",
-            "size",
+            "file",
+            "folder",
+            "user",
             "since_added",
             "name",
+            "size",
             "file_type",
-            "parent_folder",
         )
