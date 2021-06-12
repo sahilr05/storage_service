@@ -1,3 +1,6 @@
+import os
+
+from django.conf import settings
 from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
@@ -38,7 +41,7 @@ class folder_detail(APIView):
 class file_detail(APIView):
     def get_object(self, pk):
         try:
-            return File.objects.get(pk=pk)
+            return File.objects.get(file_id=pk)
         except File.DoesNotExist:
             raise Http404
 
@@ -48,9 +51,15 @@ class file_detail(APIView):
         return Response(serializer.data)
 
     def put(self, request, pk):
-        file = self.get_object(pk)
-        serializer = FileSerializer(file, data=request.data)
+        selected_file = self.get_object(pk)
+        initial_path = selected_file.file.path
+        selected_file.file.name = f"documents/{request.data['name']}"
+        new_path = settings.MEDIA_ROOT + "/" + selected_file.file.name
+        os.rename(initial_path, new_path)
+        selected_file.save()
+        serializer = FileSerializer(selected_file, data=request.data, partial=True)
         if serializer.is_valid():
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

@@ -58,7 +58,6 @@ class FileSerializer(serializers.ModelSerializer):
         model = File
         fields = (
             "file_id",
-            "file",
             "size",
             "since_added",
             "name",
