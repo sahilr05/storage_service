@@ -6,9 +6,9 @@ from .models import Folder
 
 class FolderSerializer(serializers.ModelSerializer):
     sub_folders = serializers.SerializerMethodField()
-    creator = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
 
-    def get_creator(self, obj):
+    def get_user(self, obj):
         return obj.user.username
 
     def get_sub_folders(self, obj):
@@ -19,7 +19,7 @@ class FolderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Folder
-        fields = ("name", "creator", "sub_folders")
+        fields = ("name", "user", "sub_folders", "folder")
 
 
 class FileSerializer(serializers.ModelSerializer):

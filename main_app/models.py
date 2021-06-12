@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 class Folder(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="userfolders")
     folder = models.ForeignKey(
-        "self", on_delete=models.CASCADE, related_name="folders", null=True
+        "self", on_delete=models.CASCADE, related_name="folders", null=True, blank=True
     )
     name = models.CharField(_("Folder Name"), max_length=70)
 
