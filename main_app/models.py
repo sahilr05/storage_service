@@ -4,6 +4,16 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 
+def validate_file_extension(value):
+    import os
+    from django.core.exceptions import ValidationError
+
+    ext = os.path.splitext(value.name)[1]  # [0] returns path+filename
+    valid_extensions = [".pdf", ".txt", ".docx", ".html"]
+    if not ext.lower() in valid_extensions:
+        raise ValidationError("Unsupported file extension.")
+
+
 class Folder(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="userfolders")
     folder = models.ForeignKey(
@@ -24,7 +34,12 @@ class File(models.Model):
         null=True,
         blank=True,
     )
-    file = models.FileField(null=True, max_length=255, upload_to="documents/")
+    file = models.FileField(
+        null=True,
+        max_length=255,
+        upload_to="documents/",
+        validators=[validate_file_extension],
+    )
     date_created = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_files")
 
