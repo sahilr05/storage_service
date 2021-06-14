@@ -60,11 +60,17 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # main app
     "main_app",
+    # rest framework
     "rest_framework",
+    # rest framework token auth
     "rest_framework.authtoken",
+    # swagger ui to view all available APIs
     "rest_framework_swagger",
     "drf_yasg",
+    # indexing
+    "haystack",
 ]
 
 REST_FRAMEWORK = {
@@ -118,6 +124,12 @@ DATABASES = {
     }
 }
 
+HAYSTACK_CONNECTIONS = {
+    "default": {
+        "ENGINE": "haystack.backends.whoosh_backend.WhooshEngine",
+        "PATH": os.path.join(os.path.dirname(__file__), "whoosh_index"),
+    },
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -132,6 +144,22 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
+]
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ]
+        },
+    }
 ]
 
 

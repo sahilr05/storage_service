@@ -11,6 +11,8 @@ urlpatterns = [
     path("create_file/", views.create_file.as_view()),
     path("copy_file/<int:pk>/", views.file_ops.as_view()),
     path("move_file/<int:pk>/<int:folder_pk>/", views.file_ops.as_view()),
+    # path("search/",include('haystack.urls'))
+    path("search/", views.FileSearchViewSet.as_view({"get": "list"})),
 ]
 
 if settings.DEBUG:

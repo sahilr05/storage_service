@@ -3,7 +3,10 @@ import os
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.http import Http404
+from haystack.query import SearchQuerySet
+from rest_framework import mixins
 from rest_framework import status
+from rest_framework import viewsets
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -24,6 +27,19 @@ def get_object(pk, pk_type):
             return Folder.objects.get(pk=pk)
     except File_Model.DoesNotExist:
         raise Http404
+
+
+class FileSearchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    serializer_class = FileSerializer
+
+    # search file by na,e
+    def get_queryset(self, *args, **kwargs):
+        params = self.request.query_params
+        query = SearchQuerySet().all()
+        keywords = params.get("q")
+        if keywords:
+            query = query.filter(name=keywords)
+        return query
 
 
 class folder_list(APIView):
