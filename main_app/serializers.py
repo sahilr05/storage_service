@@ -1,7 +1,21 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from .models import File
 from .models import Folder
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["email", "username", "password"]
+        extra_kwargs = {"password": {"write_only": True}}
+
+    def create(self, validated_data):
+        user = User(email=validated_data["email"], username=validated_data["username"])
+        user.set_password(validated_data["password"])
+        user.save()
+        return user
 
 
 class FolderSerializer(serializers.ModelSerializer):
@@ -54,7 +68,6 @@ class FileSerializer(serializers.ModelSerializer):
         fields = (
             "file",
             "folder",
-            "user",
             "since_added",
             "name",
             "size",
