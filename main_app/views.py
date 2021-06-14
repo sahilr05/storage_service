@@ -16,12 +16,24 @@ from main_app.serializers import FolderSerializer
 # from rest_framework.permissions import IsAuthenticated
 
 
+def get_object(pk, pk_type):
+    try:
+        if pk_type:
+            return File_Model.objects.get(file_id=pk)
+        else:
+            return Folder.objects.get(pk=pk)
+    except File_Model.DoesNotExist:
+        raise Http404
+
+
 class folder_list(APIView):
+    # get list of folders
     def get(self, request):
         folders = Folder.objects.filter(folder=None)
         serializer = FolderSerializer(folders, many=True)
         return Response(serializer.data)
 
+    # create folder
     def post(self, request):
         serializer = FolderSerializer(data=request.data)
         if serializer.is_valid():
@@ -31,6 +43,8 @@ class folder_list(APIView):
 
 
 class folder_detail(APIView):
+
+    # get folder detail
     def get(self, request, pk):
         folder = Folder.objects.get(id=pk)
         folder_serializer = FolderSerializer(folder)
@@ -41,8 +55,17 @@ class folder_detail(APIView):
         context = [folder_serializer.data, file_serializer.data]
         return Response(context)
 
+    # rename folder
+    def patch(self, request, pk):
+        folder = get_object(pk, 0)
+        folder.name = request.data["name"]
+        folder.save()
+        return Response(status=status.HTTP_200_OK)
+
 
 class create_file(APIView):
+
+    # create file
     def post(self, request):
         parser_classes = (MultiPartParser,)  # NOQA
 
@@ -54,46 +77,16 @@ class create_file(APIView):
 
 
 class file_ops(APIView):
-    def get_object(self, pk):
-        try:
-            return File_Model.objects.get(file_id=pk)
-        except File_Model.DoesNotExist:
-            raise Http404
 
-    # move file
-    def put(self, request, pk, folder_pk):
-        # return Response(folder_pk)
-        selected_file = self.get_object(pk)
-        selected_file.folder = Folder.objects.get(pk=folder_pk)
-        selected_file.save()
-        return Response(status=status.HTTP_200_OK)
-
-    # copy file
-    def post(self, request, pk):
-        selected_file = self.get_object(pk)
-        file_copy = ContentFile(selected_file.file.read())
-        new_file_name, ext = selected_file.file.name.split(".")
-        new_file = File_Model(folder=selected_file.folder, user=selected_file.user)
-        new_file.file.save(
-            new_file_name.split("/")[-1] + "-copy" + "." + ext, file_copy
-        )
-        return Response(status=status.HTTP_201_CREATED)
-
-
-class file_detail(APIView):
-    def get_object(self, pk):
-        try:
-            return File_Model.objects.get(file_id=pk)
-        except File_Model.DoesNotExist:
-            raise Http404
-
+    # get file detail
     def get(self, request, pk):
-        file = self.get_object(pk)
+        file = get_object(pk, 1)
         serializer = FileSerializer(file)
         return Response(serializer.data)
 
-    def put(self, request, pk):
-        selected_file = self.get_object(pk)
+    # rename file
+    def patch(self, request, pk):
+        selected_file = get_object(pk, 1)
         initial_path = selected_file.file.path
         selected_file.file.name = f"documents/{request.data['name']}"
         new_path = settings.MEDIA_ROOT + "/" + selected_file.file.name
@@ -105,7 +98,26 @@ class file_detail(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    # delete file
     def delete(self, request, pk):
-        file = self.get_object(pk)
+        file = get_object(pk, 1)
         file.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # move file
+    def put(self, request, pk, folder_pk):
+        selected_file = get_object(pk, 1)
+        selected_file.folder = Folder.objects.get(pk=folder_pk)
+        selected_file.save()
+        return Response(status=status.HTTP_200_OK)
+
+    # copy file
+    def post(self, request, pk):
+        selected_file = get_object(pk, 1)
+        file_copy = ContentFile(selected_file.file.read())
+        new_file_name, ext = selected_file.file.name.split(".")
+        new_file = File_Model(folder=selected_file.folder, user=selected_file.user)
+        new_file.file.save(
+            new_file_name.split("/")[-1] + "-copy" + "." + ext, file_copy
+        )
+        return Response(status=status.HTTP_201_CREATED)
