@@ -12,6 +12,7 @@ from main_app.models import File as File_Model
 from main_app.models import Folder
 from main_app.serializers import FileSerializer
 from main_app.serializers import FolderSerializer
+
 # from rest_framework.permissions import IsAuthenticated
 
 
@@ -59,6 +60,14 @@ class file_ops(APIView):
         except File_Model.DoesNotExist:
             raise Http404
 
+    # move file
+    def put(self, request, pk, folder_pk):
+        # return Response(folder_pk)
+        selected_file = self.get_object(pk)
+        selected_file.folder = Folder.objects.get(pk=folder_pk)
+        selected_file.save()
+        return Response(status=status.HTTP_200_OK)
+
     # copy file
     def post(self, request, pk):
         selected_file = self.get_object(pk)
@@ -69,19 +78,6 @@ class file_ops(APIView):
             new_file_name.split("/")[-1] + "-copy" + "." + ext, file_copy
         )
         return Response(status=status.HTTP_201_CREATED)
-
-    def put(self, request, pk):
-        selected_file = self.get_object(pk)
-        initial_path = selected_file.file.path
-        selected_file.file.name = f"documents/{request.data['name']}"
-        new_path = settings.MEDIA_ROOT + "/" + selected_file.file.name
-        os.rename(initial_path, new_path)
-        selected_file.save()
-        serializer = FileSerializer(selected_file, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class file_detail(APIView):
