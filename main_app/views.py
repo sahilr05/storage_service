@@ -8,6 +8,7 @@ from rest_framework import mixins
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.parsers import MultiPartParser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -15,8 +16,6 @@ from main_app.models import File as File_Model
 from main_app.models import Folder
 from main_app.serializers import FileSerializer
 from main_app.serializers import FolderSerializer
-
-# from rest_framework.permissions import IsAuthenticated
 
 
 def get_object(pk, pk_type):
@@ -30,6 +29,7 @@ def get_object(pk, pk_type):
 
 
 class FileSearchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    permission_classes = (IsAuthenticated,)
     serializer_class = FileSerializer
 
     # search file by na,e
@@ -43,15 +43,17 @@ class FileSearchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class folder_list(APIView):
+    permission_classes = (IsAuthenticated,)
+
     # get list of folders
     def get(self, request):
-        folders = Folder.objects.filter(folder=None)
+        folders = Folder.objects.filter(folder=None, user=request.user)
         serializer = FolderSerializer(folders, many=True)
         return Response(serializer.data)
 
     # create folder
     def post(self, request):
-        serializer = FolderSerializer(data=request.data)
+        serializer = FolderSerializer(data=request.data, user=request.user)
         if serializer.is_valid():
             serializer.save(user=self.request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -59,6 +61,7 @@ class folder_list(APIView):
 
 
 class folder_detail(APIView):
+    permission_classes = (IsAuthenticated,)
 
     # get folder detail
     def get(self, request, pk):
@@ -80,12 +83,13 @@ class folder_detail(APIView):
 
 
 class create_file(APIView):
+    permission_classes = (IsAuthenticated,)
 
     # create file
     def post(self, request):
         parser_classes = (MultiPartParser,)  # NOQA
 
-        serializer = FileSerializer(data=request.data)
+        serializer = FileSerializer(data=request.data, user=request.user)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -93,6 +97,7 @@ class create_file(APIView):
 
 
 class file_ops(APIView):
+    permission_classes = (IsAuthenticated,)
 
     # get file detail
     def get(self, request, pk):
