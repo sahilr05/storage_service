@@ -9,6 +9,7 @@ urlpatterns = [
     path("folder_detail/<int:pk>/", views.folder_detail.as_view()),
     path("file_detail/<int:pk>/", views.file_detail.as_view()),
     path("create_file/", views.create_file.as_view()),
+    path("copy_file/<int:pk>/", views.file_ops.as_view()),
 ]
 
 if settings.DEBUG:
