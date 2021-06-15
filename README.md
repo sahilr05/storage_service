@@ -9,6 +9,7 @@ Download Postman API collection from [here](https://drive.google.com/file/d/1S_S
 * Authentication
 * Get file detail (user, size, parent folder, creation date, type)
 * Upload file
+* Rename file
 * Create folder
 * Rename folder
 * List of folders
