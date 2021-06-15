@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls.static import static
+from django.urls import include
 from django.urls import path
 
 from main_app import views
@@ -12,7 +13,7 @@ urlpatterns = [
     path("copy_file/<int:pk>/", views.file_ops.as_view()),
     path("move_file/<int:pk>/<int:folder_pk>/", views.file_ops.as_view()),
     # path("search/",include('haystack.urls'))
-    path("search/", views.FileSearchViewSet.as_view({"get": "list"})),
+    path("search/", include("haystack.urls"), name="haystack_search"),
 ]
 
 if settings.DEBUG:
