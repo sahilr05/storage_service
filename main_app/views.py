@@ -137,8 +137,7 @@ class create_file(APIView):
                         "Not enough space available", status=status.HTTP_403_FORBIDDEN
                     )
                 disk_obj.disk_usage = round(
-                    float(serializer.data["size"].split()[0])
-                    + last_disk_value / (1024 * 1024),
+                    serializer.data["size"].split()[0] + last_disk_value,
                     2,
                 )
                 disk_obj.save()
@@ -195,9 +194,27 @@ class file_ops(APIView):
     def post(self, request, pk):
         selected_file = get_object(request.user, pk, 1)
         file_copy = ContentFile(selected_file.file.read())
-        new_file_name, ext = selected_file.file.name.split(".")
-        new_file = File_Model(folder=selected_file.folder, user=selected_file.user)
-        new_file.file.save(
-            new_file_name.split("/")[-1] + "-copy" + "." + ext, file_copy
-        )
-        return Response(status=status.HTTP_201_CREATED)
+        current_user = request.user
+
+        # check upload limit
+        if (current_user.id,) in StorageDetails.objects.values_list("user"):
+            last_disk_value = float(
+                StorageDetails.objects.get(user=current_user).disk_usage
+            )
+            disk_obj = StorageDetails.objects.get(user=current_user)
+            if selected_file.file.size / (1024 * 1024) + last_disk_value > 1024:
+                return Response(
+                    "Not enough space available", status=status.HTTP_403_FORBIDDEN
+                )
+            disk_obj.disk_usage = round(
+                (selected_file.file.size / (1024 * 1024) + last_disk_value), 2
+            )
+            disk_obj.save()
+
+            new_file_name, ext = selected_file.file.name.split(".")
+            new_file = File_Model(folder=selected_file.folder, user=selected_file.user)
+            new_file.file.save(
+                new_file_name.split("/")[-1] + "-copy" + "." + ext, file_copy
+            )
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
