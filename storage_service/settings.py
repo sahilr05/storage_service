@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     # indexing
     "haystack",
+    "whoosh",
 ]
 
 REST_FRAMEWORK = {

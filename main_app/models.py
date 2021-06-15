@@ -43,6 +43,7 @@ class File(models.Model):
         null=True,
         blank=True,
     )
+    name = models.CharField(max_length=50)
     file = models.FileField(
         null=True,
         max_length=255,

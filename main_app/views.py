@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.http import Http404
-from haystack.query import SearchQuerySet
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework import viewsets
@@ -67,11 +66,11 @@ class FileSearchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     # search file by name
     def get_queryset(self, *args, **kwargs):
         params = self.request.query_params
-        query = SearchQuerySet().all()
-        keywords = params.get("q")
-        if keywords:
-            query = query.filter(name=keywords)
-        return query
+        keyword = params.get("name")
+        if keyword:
+            query = File_Model.objects.filter(name__icontains=keyword)
+            return query
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class folder_list(APIView):
@@ -125,7 +124,7 @@ class create_file(APIView):
 
         serializer = FileSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
+            serializer.save(user=request.user, name=request.data["file"].name)
             current_user = request.user
             if (current_user.id,) in StorageDetails.objects.values_list("user"):
                 last_disk_value = float(
@@ -137,7 +136,7 @@ class create_file(APIView):
                         "Not enough space available", status=status.HTTP_403_FORBIDDEN
                     )
                 disk_obj.disk_usage = round(
-                    serializer.data["size"].split()[0] + last_disk_value,
+                    float(serializer.data["size"].split()[0]) + last_disk_value,
                     2,
                 )
                 disk_obj.save()
