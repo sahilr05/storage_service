@@ -15,6 +15,7 @@ from rest_framework.views import APIView
 
 from main_app.models import File as File_Model
 from main_app.models import Folder
+from main_app.models import StorageDetails
 from main_app.serializers import FileSerializer
 from main_app.serializers import FolderSerializer
 from main_app.serializers import UserSerializer
@@ -125,6 +126,27 @@ class create_file(APIView):
         serializer = FileSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
+            current_user = request.user
+            if (current_user.id,) in StorageDetails.objects.values_list("user"):
+                last_disk_value = float(
+                    StorageDetails.objects.get(user=current_user).disk_usage
+                )
+                disk_obj = StorageDetails.objects.get(user=current_user)
+                if float(serializer.data["size"].split()[0]) + last_disk_value > 1024:
+                    return Response(
+                        "Not enough space available", status=status.HTTP_403_FORBIDDEN
+                    )
+                disk_obj.disk_usage = round(
+                    float(serializer.data["size"].split()[0])
+                    + last_disk_value / (1024 * 1024),
+                    2,
+                )
+                disk_obj.save()
+            else:
+                StorageDetails.objects.create(
+                    user=current_user,
+                    disk_usage=(round(float(serializer.data["size"].split()[0]), 2)),
+                )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -155,6 +177,10 @@ class file_ops(APIView):
     # delete file
     def delete(self, request, pk):
         file = get_object(request.user, pk, 1)
+        storage_obj = StorageDetails.objects.get(user=request.user)
+        storage_obj.disk_usage -= file.file.size / (1024 * 1024)
+        storage_obj.disk_usage = round(storage_obj.disk_usage, 2)
+        storage_obj.save()
         file.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

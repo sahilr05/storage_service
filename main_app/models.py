@@ -54,3 +54,11 @@ class File(models.Model):
 
     def __str__(self):
         return self.file.name
+
+
+class StorageDetails(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    disk_usage = models.FloatField()
+
+    def __str__(self):
+        return self.user.username
