@@ -23,6 +23,10 @@ def validate_file_extension(value):
         raise ValidationError("Unsupported file extension.")
 
 
+def user_directory_path(instance, filename):
+    return "documents/user_{0}/{1}".format(instance.user.id, filename)
+
+
 class Folder(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="userfolders")
     folder = models.ForeignKey(
@@ -47,7 +51,7 @@ class File(models.Model):
     file = models.FileField(
         null=True,
         max_length=255,
-        upload_to="documents/",
+        upload_to=user_directory_path,
         validators=[validate_file_extension],
     )
     date_created = models.DateTimeField(default=timezone.now)

@@ -48,7 +48,7 @@ class FileSerializer(serializers.ModelSerializer):
         file_name = ""
         if obj.file and hasattr(obj.file, "name"):
             file_name = obj.file.name
-        return file_name
+        return file_name.split("/")[-1]
 
     def get_file_type(self, obj):
         file_name = obj.file.name

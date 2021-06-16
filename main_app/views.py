@@ -122,6 +122,11 @@ class create_file(APIView):
     def post(self, request):
         parser_classes = (MultiPartParser,)  # NOQA
 
+        if (request.data["file"].name,) in File_Model.objects.filter(
+            user=request.user
+        ).values_list("name"):
+            return Response("File already exists", status=status.HTTP_409_CONFLICT)
+
         serializer = FileSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user, name=request.data["file"].name)
